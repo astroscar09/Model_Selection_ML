@@ -20,6 +20,37 @@ map_dict = {'burst': 'Burst Fraction',
             'mass_weighted_age': 'Mass Weighted Age [Gyr]',
             'mass_weighted_zmet': 'Mass Weighted Zmet [Z/Z$_{\odot}$]'}
 
+
+def plot_histograms_from_df(df):
+
+    columns = df.columns
+
+    nrows = int(np.ceil(len(columns)/5))
+    ncols = 5
+
+    fig, ax = plt.subplots(nrows, ncols, figsize = (15, 8))
+    
+    ax = ax.flatten()
+    
+    for i, col in enumerate(columns):
+        
+        data = df[col].values
+        finite_mask = np.isfinite(data)
+        data = data[finite_mask]
+        min_data, max_data = data.min(), data.max()
+
+        diff = max_data - min_data
+        if np.log10(diff) > 2.5:
+            data = np.log10(data)
+
+        finite_mask = np.isfinite(data)
+        
+        ax[i].hist(data[finite_mask], bins = 30, color = 'purple', 
+                   edgecolor="black", linewidth=1.5, histtype="bar")
+        ax[i].set_xlabel(map_dict.get(col, col))
+    plt.tight_layout()
+    return fig, ax
+
 def compute_nmad(y_true, y_pred):
     """
     Compute NMAD between true values and predictions.
